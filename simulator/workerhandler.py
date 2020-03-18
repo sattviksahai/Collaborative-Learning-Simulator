@@ -8,10 +8,11 @@ import workerclass
 
 class workerhandler:
     """Class defining a handler for all worker nodes"""
-    def __init__(self, num_genuine_workers, num_malicious_workers):
+    def __init__(self, all_workers):
         """Initialize worker nodes"""
-        self.genuine_workers = [workerclass.workerclass() for w in range(num_genuine_workers)]
-        self.malicious_workers = [workerclass.malicious_workerclass() for w in range(num_malicious_workers)]
+        # self.genuine_workers = [workerclass.workerclass() for w in range(num_genuine_workers)]
+        # self.malicious_workers = [workerclass.malicious_workerclass() for w in range(num_malicious_workers)]
+        self.all_workers = all_workers
         
     def set_active_workers(self, num_active_workers):
         """Select a subgroup of worker nodes which will be involved in the current iteration"""
@@ -24,10 +25,7 @@ class workerhandler:
 
     def get_all_workers(self):
         """Returns a list of all workers"""
-        temp_list=[]
-        temp_list = self.genuine_workers.copy()
-        temp_list.extend(self.malicious_workers)
-        return temp_list
+        return self.all_workers.copy()
         
     # def loss(self, temp_w):
     #     """Compute local loss"""
