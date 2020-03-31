@@ -15,16 +15,26 @@ class ImageData(Dataset):
 
 class base_workerclass:
     """ Class defining a worker node """
-    def __init__(self, malicious, neighbors=[]):
+    def __init__(self, name, is_malicious_worker, neighbors=[]):
         """ Initialize the worker node """
-        self.malicious=malicious
+        self.name=name
+        self.optim=None
+        self.is_malicious_worker=is_malicious_worker
         self.neighbors=neighbors
 
     def set_param(self, w):
         """ set model parameters to latest """
         raise Exception('set_param function not defined')
-        
-    def client_update(self):
+
+    def get_params(self):
+        """ Returns model parameters """
+        raise Exception('get_param function not defined')
+
+    def set_optim(self):
+        """ set optimizer for model """
+        raise Exception('optimizer not defined')
+
+    def client_update(self, global_epoch):
         """ Perform updates on model using worker data """
         raise Exception('client_update function not defined')
 
@@ -37,7 +47,7 @@ class base_workerclass:
         self.neighbors.append(node)
 
     def is_malicious(self):
-        return self.malicious
+        return self.is_malicious_worker
 
 # class malicious_workerclass:
 #     """ Class defining a worker node """

@@ -2,6 +2,8 @@ import torch
 import numpy as np
 import os
 import sys
+import random
+from collections import OrderedDict
 sys.path.insert(0, os.path.dirname(__file__))
 
 import workerclass
@@ -13,20 +15,57 @@ class workerhandler:
         # self.genuine_workers = [workerclass.workerclass() for w in range(num_genuine_workers)]
         # self.malicious_workers = [workerclass.malicious_workerclass() for w in range(num_malicious_workers)]
         self.all_workers = all_workers
+        self.active_status = np.array([True] * len(self.all_workers))
         
-    def set_active_workers(self, num_active_workers):
+    def set_active_workers(self, num_active_workers = None):
         """Select a subgroup of worker nodes which will be involved in the current iteration"""
+        assert num_active_workers <= len(self.all_workers), ('number of active workers cannot be more than total number of workers')
+        assert num_active_workers >= 0, ('number of active workers cannot be negative')
+        if None != num_active_workers:
+            passive_indices = random.sample(range(0, len(self.all_workers)), len(self.all_workers)-num_active_workers)
+            self.active_status[passive_indices] = False
 
-    def perform_updates(self):
+    def get_active_status(self):
+        """Returns active status of all workers"""
+        return self.active_status
+
+    def perform_updates(self, global_epoch):
         """Invokes a round of learning on active workers"""
+        grads = []
+        for worker in self.all_workers:
+            print("training on worker: ",worker.name)
+            grads.append(worker.client_update(global_epoch))
+        gradavg = OrderedDict()
+        for layer in grads[0].keys():
+            values=[]
+            for grad in grads:
+                values.append(grad[layer])
+            mean_val = torch.sum(torch.stack(values), axis=0)/len(self.all_workers)
+            gradavg.update({layer:mean_val})
+        return gradavg
 
     def set_param(self, w):
         """Set model parameters to latest"""
+        for worker in self.all_workers:
+            worker.set_param(w)
 
     def get_all_workers(self):
         """Returns a list of all workers"""
         return self.all_workers.copy()
         
+    def get_average_weights(self):
+        """Returns average weights of all workers"""
+        weights = []
+        for worker in self.all_workers:
+            weights.append(worker.get_params())
+        weightsavg = OrderedDict()
+        for layer in weights[0].keys():
+            values=[]
+            for grad in weights:
+                values.append(grad[layer])
+            mean_val = torch.sum(torch.stack(values), axis=0)/len(self.all_workers)
+            weightsavg.update({layer:mean_val})
+        return weightsavg
     # def loss(self, temp_w):
     #     """Compute local loss"""
     #     yx = numpy.multiply(self.y_batch, self.x_batch) # s-by-d
@@ -66,3 +105,7 @@ class workerhandler:
     #             g = self.gradient(self.y_batch[j,:], self.x_batch[j,:], temp_w)
     #             temp_w = self.agd(g, temp_w)
     #     return self.w - temp_w, obj_vals
+
+if __name__ == "__main__":
+    workers = workerhandler([None,None])
+    print(workers.get_active_status())

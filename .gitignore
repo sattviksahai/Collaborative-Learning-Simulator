@@ -1,3 +1,4 @@
 runs/
 .ipynb_checkpoints/
 models/*
+simulator/__pycache__/*
