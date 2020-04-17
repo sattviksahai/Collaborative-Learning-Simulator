@@ -11,6 +11,11 @@ source my_env/bin/activate
 pip install -r requirements.txt
 ```
 
+## Installation
+```bash
+pip install cl_simulator
+```
+
 ## Example Implementations
 The repository contains two example implementation. 
 ### Federated Averaging:
