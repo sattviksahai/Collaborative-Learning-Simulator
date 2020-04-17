@@ -3,3 +3,6 @@ runs/
 models/*
 **/*.pyc
 working_dir/
+build/
+cl_simulator.egg-info/
+dist/
